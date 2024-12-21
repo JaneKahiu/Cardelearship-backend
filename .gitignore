@@ -1,0 +1,39 @@
+# Django
+*.log
+*.pot
+*.pyc
+__pycache__
+db.sqlite3
+/static/
+*.sqlite3
+
+# Environments
+.env
+
+# Virtual environment
+venv/
+.env/
+*.pyc
+
+# PyCharm
+.idea/
+
+# Mac
+.DS_Store
+
+# Windows
+Thumbs.db
+
+
+# Environment and virtual environment directories
+.venv
+venv/
+ENV/
+env/
+*.env
+Include
+Lib
+Scripts
+pyvenv.cfg
+
+
