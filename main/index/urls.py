@@ -12,6 +12,7 @@ from .views import (
     CustomerManagementViewSet,
     SignupView,
     LoginView,
+    UserDashboardView,
 )
 
 # Setting up the router for viewsets
@@ -28,6 +29,7 @@ urlpatterns = [
     # Custom views
     path('api/signup/', SignupView.as_view(), name='signup'),
     path('api/login/', LoginView.as_view(), name='login'),
+    path('api/user-dashboard/', UserDashboardView.as_view(), name='user-dashboard'),
     path('api/search-cars/', SearchCarViewSet.as_view(), name='search-cars'),
     path('api/car-specifications/<int:pk>/', CarSpecificationsView.as_view(), name='car-specifications'),
     path('api/make-inquiry/', MakeInquiryViewSet.as_view(), name='make-inquiry'),

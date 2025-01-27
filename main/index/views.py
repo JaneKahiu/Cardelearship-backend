@@ -1,4 +1,4 @@
-from django.shortcuts import render 
+from django.shortcuts import render ,redirect
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
@@ -171,8 +171,12 @@ class LoginView(APIView):
             return JsonResponse({'message': 'Username and password required'}, status=400)
         user = authenticate(username=username, password=password)
         if user:
-            return JsonResponse({'message': 'Login successful'}, status=200)
+            return redirect('/user-dashboard/')
         return JsonResponse({'message': 'Invalid credentials'}, status=400)
 
-
+class UserDashboardView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+    def get(self,request):
+        username = request.user.username
+        return JsonResponse({'message': f'Hello {username}, welcome to your dashboard'}, status=200)
 
