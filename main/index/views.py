@@ -5,13 +5,15 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, action
 from rest_framework import status, viewsets, mixins, generics
 from rest_framework.response import Response
+from rest_framework.views import APIView
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
-from .serializers import CustomerSerializer, InquirySerializer, CarSerializer
+from .serializers import CustomerSerializer, InquirySerializer, CarSerializer, UserSerializer
 from .models import Customer, Inquiry, Car
+from rest_framework.permissions import AllowAny
 from rest_framework import permissions
 #customer profile view
 class CustomerProfileViewSet(viewsets.ModelViewSet):
@@ -20,31 +22,31 @@ class CustomerProfileViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Filter to get only the profile of the authenticated user
+       
         return super().get_queryset().filter(user=self.request.user)
 
     def perform_update(self, serializer):
-        # Ensure that the updated data is saved for the current user
+        
         serializer.save(user=self.request.user)
 
-    # Override the `retrieve` method to ensure it only returns the current user's profile
+    
     def retrieve(self, request, *args, **kwargs):
-        # Since `get_queryset` already filters by the current user, `retrieve` will only return that user's profile.
+       
         instance = self.get_object()
         serializer = self.get_serializer(instance)
         return Response(serializer.data)
 
-    # Optionally, you can create a custom action for updating the profile (though `perform_update` already handles PUT)
+    
     @action(detail=False, methods=['put'], permission_classes=[permissions.IsAuthenticated])
     def update_profile(self, request):
-        # Ensure only the current user can update their profile
-        customer = self.get_queryset().first()  # Get the authenticated user's profile
+       
+        customer = self.get_queryset().first()  
         if customer:
             serializer = self.get_serializer(customer, data=request.data)
             if serializer.is_valid():
-                serializer.save()  # Save the updated profile
-                return Response(serializer.data)  # Return the updated profile data
-            return Response(serializer.errors, status=400)  # Return validation errors if any
+                serializer.save()  
+                return Response(serializer.data)  
+            return Response(serializer.errors, status=400) 
         return Response({"error": "Profile not found."}, status=404)
 
 #customer inquiry view
@@ -96,18 +98,17 @@ class SearchCarViewSet(generics.ListAPIView):
 class CarSpecificationsView(generics.RetrieveAPIView):
     queryset = Car.objects.all()
     serializer_class = CarSerializer
-    lookup_field = 'pk'#lookup by the primarykey
+    lookup_field = 'pk'
 
     def get(self,request, *args, **kwargs):
         car = self.get_object()
-        serializer = self.get_serializer(car)#serialize the car object
-        return Response(serializer.data)#return the serialized data as response
+        serializer = self.get_serializer(car)
+        return Response(serializer.data)
 #inquiry view
 class MakeInquiryViewSet(generics.CreateAPIView):
     queryset = Inquiry.objects.all()
     serializer_class = InquirySerializer
-    permission_classes = [permissions.IsAuthenticated] #ensure the user is authenticated to make an inquiry
-
+    permission_classes = [permissions.IsAuthenticated] 
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user.customer)
 #view inquiry list view
@@ -140,79 +141,38 @@ class CustomerManagementViewSet(viewsets.ModelViewSet):
     def perform_update(self, serializer):
         serializer.save()
 
-
-
-
-
-# Setting up a logger
+#Signup view    
 logger = logging.getLogger(__name__)
+class SignupView(APIView):
+    permission_classes = [AllowAny]
 
-# Setting up logger
-logger = logging.getLogger(__name__)
-
-@api_view(['POST'])
-def signup(request):
-    if request.method == 'POST':
-        # Log the incoming request data
+    def post(self, request):
         logger.info(f"Signup request received with data: {request.data}")
 
-        # Get data from the request
-        username = request.data.get('username')
-        password = request.data.get('password')
-        email = request.data.get('email')
-
-        # Check for missing data
-        if not username:
-            return Response({'error': 'Username is required'}, status=status.HTTP_400_BAD_REQUEST)
-        if not password:
-            return Response({'error': 'Password is required'}, status=status.HTTP_400_BAD_REQUEST)
-        if not email:
-            return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Check if the email already exists
-        if User.objects.filter(email=email).exists():
-            return Response({'error': 'Email is already in use'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Check if username already exists
-        if User.objects.filter(username=username).exists():
-            return Response({'error': 'Username is already taken'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Validate the password
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            logger.info(f"User {user.username} created successfully with email{user.email}")
+            return Response ({'message': 'User created successfully', 'username':user.username}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+#Login view
+class LoginView(APIView):
+    permission_classes = [AllowAny]
+    def post(self, request):
         try:
-            validate_password(password)
-        except ValidationError as e:
-            return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Create the user
-        try:
-            user = User.objects.create_user(username=username, password=password, email=email)
-        except Exception as e:
-            logger.error(f"Error creating user: {e}")
-            return Response({'error': 'An error occurred while creating the user'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-        # Log user creation
-        logger.info(f"User {username} created successfully with email {email}")
-
-        # Print user creation success message
-        print(f"User {username} created successfully with email {email}")
-
-        # Return a success response with the username and message
-        return Response({'message': 'User created successfully!', 'username': user.username}, status=status.HTTP_201_CREATED)
-
-    # If the request method is not POST, return a 405 error
-    return Response({'error': 'Invalid request method'}, status=status.HTTP_405_METHOD_NOT_ALLOWED)
-
-#login view
-@csrf_exempt
-def login(request):
-    if request.method == 'POST':
-        data = json.loads(request.body)
+            data =json.loads(request.body)
+        except json.loads(request.body):
+            return JsonResponse({'message': 'Invalid request body'}, status=400)
         username = data.get('username')
         password = data.get('password')
-        
-        user = authenticate (username=username, password=password)
-        if user is not  None:
-            return JsonResponse({'message': 'Login successfull!'})
-        return JsonResponse({'error': 'Invalid credentials'}, status=400)
-    
-    return JsonResponse({'error': 'Invalid request method'}, status=400)
+
+        if not username or not password:
+            return JsonResponse({'message': 'Username and password required'}, status=400)
+        user = authenticate(username=username, password=password)
+        if user:
+            return JsonResponse({'message': 'Login successful'}, status=200)
+        return JsonResponse({'message': 'Invalid credentials'}, status=400)
+
+
+
