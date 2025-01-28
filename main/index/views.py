@@ -171,7 +171,7 @@ class LoginView(APIView):
             return JsonResponse({'message': 'Username and password required'}, status=400)
         user = authenticate(username=username, password=password)
         if user:
-            return redirect('/user-dashboard/')
+            return redirect('/api/user-dashboard/')
         return JsonResponse({'message': 'Invalid credentials'}, status=400)
 
 class UserDashboardView(APIView):
