@@ -2,7 +2,7 @@ from django.shortcuts import render ,redirect
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from rest_framework.decorators import api_view, action
+from rest_framework.decorators import api_view, action, permission_classes
 from rest_framework import status, viewsets, mixins, generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -11,44 +11,34 @@ from django.core.exceptions import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
-from .serializers import  UserSerializer,InquirySerializer, CarSerializer, UserSerializer
-from .models import  Inquiry, Car,User
-from rest_framework.permissions import AllowAny
+from .serializers import  UserSerializer,InquirySerializer, CarSerializer, MyTokenObtainPairSerializer, RegisterSerializer
+from .models import  Inquiry, Car,User,Profile
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import permissions
-#customer profile view
-"""class CustomerProfileViewSet(viewsets.ModelViewSet):
-    queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
-    permission_classes = [permissions.IsAuthenticated]
 
-    def get_queryset(self):
-       
-        return super().get_queryset().filter(user=self.request.user)
 
-    def perform_update(self, serializer):
-        
-        serializer.save(user=self.request.user)
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-    
-    def retrieve(self, request, *args, **kwargs):
-       
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)
+class MyTokenObtainPairView(TokenObtainPairView):
+    serializer_class = MyTokenObtainPairSerializer
 
-    
-    @action(detail=False, methods=['put'], permission_classes=[permissions.IsAuthenticated])
-    def update_profile(self, request):
-       
-        customer = self.get_queryset().first()  
-        if customer:
-            serializer = self.get_serializer(customer, data=request.data)
-            if serializer.is_valid():
-                serializer.save()  
-                return Response(serializer.data)  
-            return Response(serializer.errors, status=400) 
-        return Response({"error": "Profile not found."}, status=404)
-"""
+class RegisterView(generics.CreateAPIView):
+    queryset = User.objects.all()
+    permission_classes = [AllowAny]
+    serializer_class = RegisterSerializer
+@api_view(['GET','POST'])
+@permission_classes([IsAuthenticated]) 
+def dashboard(request):
+    if request.method == 'GET':
+        response = f"Hello, {request.user.username}!"
+        return Response({'response':response}, status=status.HTTP_200_OK)
+    elif request.method == "POST":
+        text = request.data.get("text")
+        response = f"Hello, {request.user}, you text is: {text}"
+        return Response({'response':response}, status=status.HTTP_200_OK)
+    return Response({'response':'Invalid request'}, status=status.HTTP_400_BAD_REQUEST)
+
+
 #customer inquiry view
 class InquiryListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = InquirySerializer
@@ -140,43 +130,3 @@ class CustomerManagementViewSet(viewsets.ModelViewSet):
         serializer.save()
     def perform_update(self, serializer):
         serializer.save()
-
-#Signup view    
-logger = logging.getLogger(__name__)
-class SignupView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-        logger.info(f"Signup request received with data: {request.data}")
-
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            user = serializer.save()
-            logger.info(f"User {user.username} created successfully with email{user.email}")
-            return Response ({'message': 'User created successfully', 'username':user.username}, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
-#Login view
-class LoginView(APIView):
-    permission_classes = [AllowAny]
-    def post(self, request):
-        try:
-            data =json.loads(request.body)
-        except json.loads(request.body):
-            return JsonResponse({'message': 'Invalid request body'}, status=400)
-        username = data.get('username')
-        password = data.get('password')
-
-        if not username or not password:
-            return JsonResponse({'message': 'Username and password required'}, status=400)
-        user = authenticate(username=username, password=password)
-        if user:
-            return redirect('/api/user-dashboard/')
-        return JsonResponse({'message': 'Invalid credentials'}, status=400)
-
-class UserDashboardView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-    def get(self,request):
-        username = request.user.username
-        return JsonResponse({'message': f'Hello {username}, welcome to your dashboard'}, status=200)
-

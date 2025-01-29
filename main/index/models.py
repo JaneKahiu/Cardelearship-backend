@@ -4,12 +4,6 @@ from django.db.models.signals import post_save
 from django.conf import settings
 
 class User(AbstractUser):
-    ROLE_CHOICES = [
-        ('customer', 'Customer'),
-        ('seller', 'Seller'),
-
-    ]
-    role =models.CharField(max_length=20,choices=ROLE_CHOICES, default='customer')
     email = models.EmailField(unique=True)   
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = ['username']
@@ -45,7 +39,6 @@ class Inquiry(models.Model):
 
 #car model
 class Car(models.Model):
-    seller = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, limit_choices_to={'role': 'seller'},null=True, blank=True)
     model_name = models.CharField(max_length=100, null=True,blank=True)
     make = models.CharField(max_length=100)
     year = models.IntegerField()
