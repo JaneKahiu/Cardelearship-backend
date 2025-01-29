@@ -1,28 +1,40 @@
 from rest_framework import serializers
-from .models import  Inquiry, Car
+from .models import  Inquiry, Car,User,Profile
 from rest_framework.serializers import ModelSerializer
-from django.contrib.auth.models import User
 
-class UserSerializer(ModelSerializer):
-    confirmPassword = serializers.CharField(write_only=True)
+from django.contrib.auth.password_validation import validate_password
+
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['username', 'email', 'password', 'confirmPassword']
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = '__all__'
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+
+        token['full_name'] = user.profile.full_name
+        token['username'] = user.username
+        token['email'] = user.email
+
+        return token
+class RegisterSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True, validators=[validate_password])
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ('email', 'username', 'password', 'password2')
+
+        def validate(self, attrs):
+            if attrs['password'] != attrs['password2']:
+                raise serializers.ValidationError({"password": "Password fields didn't match."})
+
+            return attrs
     
-    def validate(self, data):
-        """
-        Ensure the passwords are the same
-        """
-        if data['password'] !=data['confirmPassword']:
-            raise serializers.ValidationError({"confirmPassword": "Passwords do not match."})
-        return data
-    def create(self, validated_data):
-        """Remove confirmPassword before saving the user"""
-        validated_data.pop('confirmPassword')
-        return User.objects.create_user(**validated_data)
-
-
 
 class InquirySerializer(serializers.ModelSerializer):
     class Meta:
