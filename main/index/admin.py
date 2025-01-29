@@ -1,7 +1,17 @@
 from django.contrib import admin
-
 # Register your models here.
-from .models import Customer, Inquiry, Car
-admin.site.register(Customer)
+from .models import  Inquiry, Car, User, Profile
+
+class UserAdmin(admin.ModelAdmin):
+    list_display = ['username', 'email',]
+
+class ProfileAdmin(admin.ModelAdmin):
+    list_display = ['user', 'full_name',]
+
+
 admin.site.register(Inquiry)
 admin.site.register(Car)
+admin.site.register(User, UserAdmin)
+admin.site.register(Profile, ProfileAdmin)
+
+

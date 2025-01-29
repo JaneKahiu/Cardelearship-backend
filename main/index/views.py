@@ -11,12 +11,12 @@ from django.core.exceptions import ValidationError
 from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
-from .serializers import CustomerSerializer, InquirySerializer, CarSerializer, UserSerializer
-from .models import Customer, Inquiry, Car
+from .serializers import  UserSerializer,InquirySerializer, CarSerializer, UserSerializer
+from .models import  Inquiry, Car,User
 from rest_framework.permissions import AllowAny
 from rest_framework import permissions
 #customer profile view
-class CustomerProfileViewSet(viewsets.ModelViewSet):
+"""class CustomerProfileViewSet(viewsets.ModelViewSet):
     queryset = Customer.objects.all()
     serializer_class = CustomerSerializer
     permission_classes = [permissions.IsAuthenticated]
@@ -48,7 +48,7 @@ class CustomerProfileViewSet(viewsets.ModelViewSet):
                 return Response(serializer.data)  
             return Response(serializer.errors, status=400) 
         return Response({"error": "Profile not found."}, status=404)
-
+"""
 #customer inquiry view
 class InquiryListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     serializer_class = InquirySerializer
@@ -132,8 +132,8 @@ class CarMangementViewSet(viewsets.ModelViewSet):
 
 #customer management system view
 class CustomerManagementViewSet(viewsets.ModelViewSet):
-    queryset = Customer.objects.all()
-    serializer_class = CustomerSerializer
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def perform_create(self, serializer):

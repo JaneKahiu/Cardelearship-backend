@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from .views import (
-    CustomerProfileViewSet,
+  
     InquiryListViewSet,
   
     SearchCarViewSet,
@@ -17,7 +17,6 @@ from .views import (
 
 # Setting up the router for viewsets
 router = DefaultRouter()
-router.register(r'customer-profile', CustomerProfileViewSet, basename='customer-profile')
 router.register(r'inquiry-list', InquiryListViewSet, basename='inquiry-list')
 router.register(r'car-management', CarMangementViewSet, basename='car-management')
 router.register(r'customer-management', CustomerManagementViewSet, basename='customer-management')
@@ -35,3 +34,4 @@ urlpatterns = [
     path('api/make-inquiry/', MakeInquiryViewSet.as_view(), name='make-inquiry'),
     path('api/view-inquiries/', ViewInquiryListView.as_view(), name='view-inquiries'),
 ]
+""

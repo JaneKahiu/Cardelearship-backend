@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Customer, Inquiry, Car
+from .models import  Inquiry, Car
 from rest_framework.serializers import ModelSerializer
 from django.contrib.auth.models import User
 
@@ -23,10 +23,6 @@ class UserSerializer(ModelSerializer):
         return User.objects.create_user(**validated_data)
 
 
-class CustomerSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Customer
-        fields = '__all__'
 
 class InquirySerializer(serializers.ModelSerializer):
     class Meta:
