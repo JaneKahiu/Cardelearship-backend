@@ -11,7 +11,7 @@ from .views import (
     ViewInquiryListView,
     CarMangementViewSet,
     CustomerManagementViewSet,
-    MyTokenObtainPairView,
+    CustomTokenObtainPairView,
     RegisterView,
     dashboard,
 )
@@ -27,7 +27,7 @@ urlpatterns = [
     path('api/', include(router.urls)),
 
     # Custom views
-    path('api/token/', MyTokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/',  CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('api/register/',   RegisterView.as_view(), name='register'),
     path('api/user-dashboard/', dashboard, name='user-dashboard'),

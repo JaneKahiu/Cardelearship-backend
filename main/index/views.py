@@ -19,7 +19,7 @@ from rest_framework import permissions
 
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-class MyTokenObtainPairView(TokenObtainPairView):
+class CustomTokenObtainPairView(TokenObtainPairView):
     serializer_class = MyTokenObtainPairSerializer
 
 class RegisterView(generics.CreateAPIView):
