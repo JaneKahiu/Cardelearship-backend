@@ -90,6 +90,7 @@ class MakeInquiryViewSet(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated] 
     def perform_create(self, serializer):
         serializer.save(customer=self.request.user.customer)
+
 #view inquiry list view
 class ViewInquiryListView(generics.ListAPIView):
     serializer_class = InquirySerializer
@@ -104,10 +105,6 @@ class CarMangementViewSet(viewsets.ModelViewSet):
     serializer_class = CarSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save()
-    def perform_update(self, serializer):
-        serializer.save()
 
 #customer management system view
 class CustomerManagementViewSet(viewsets.ModelViewSet):
@@ -115,7 +112,4 @@ class CustomerManagementViewSet(viewsets.ModelViewSet):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated]
 
-    def perform_create(self, serializer):
-        serializer.save()
-    def perform_update(self, serializer):
-        serializer.save()
+
