@@ -40,12 +40,12 @@ def dashboard(request):
 
 
 #customer inquiry view
-class InquiryListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
+class InquiryListViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = InquirySerializer
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        return super().get_queryset().filter(customer__user=self.request.user)
+        return Inquiry.objects.filter(customer__user=self.request.user)
 
 #search car view
 class SearchCarViewSet(generics.ListAPIView):
@@ -77,23 +77,12 @@ class SearchCarViewSet(generics.ListAPIView):
 
         return queryset
 
-    def list(self, request, *args, **kwargs):
-        """
-        Override the list method to handle search functionality and return results.
-        """
-        queryset = self.get_queryset()
-        serializer = self.get_serializer(queryset, many=True)
-        return Response(serializer.data)
 #car specification view
 class CarSpecificationsView(generics.RetrieveAPIView):
     queryset = Car.objects.all()
     serializer_class = CarSerializer
     lookup_field = 'pk'
 
-    def get(self,request, *args, **kwargs):
-        car = self.get_object()
-        serializer = self.get_serializer(car)
-        return Response(serializer.data)
 #inquiry view
 class MakeInquiryViewSet(generics.CreateAPIView):
     queryset = Inquiry.objects.all()
