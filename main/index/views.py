@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework import status, viewsets,  generics
 from rest_framework.response import Response
-import json
-import logging
 from .serializers import  UserSerializer,InquirySerializer, CarSerializer, MyTokenObtainPairSerializer, RegisterSerializer
 from .models import  Inquiry, Car,User
 from rest_framework.permissions import AllowAny, IsAuthenticated

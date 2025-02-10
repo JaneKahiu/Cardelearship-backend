@@ -33,7 +33,5 @@ urlpatterns = [
     path('api/user-dashboard/', dashboard, name='user-dashboard'),
     path('api/search-cars/', SearchCarViewSet.as_view(), name='search-cars'),
     path('api/car-specifications/<int:pk>/', CarSpecificationsView.as_view(), name='car-specifications'),
-    path('api/make-inquiry/', MakeInquiryViewSet.as_view(), name='make-inquiry'),
     path('api/view-inquiries/', ViewInquiryListView.as_view(), name='view-inquiries'),
 ]
-""
