@@ -1,18 +1,12 @@
 from django.shortcuts import render ,redirect
-from django.http import JsonResponse
-from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from rest_framework.decorators import api_view, action, permission_classes
-from rest_framework import status, viewsets, mixins, generics
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework import status, viewsets,  generics
 from rest_framework.response import Response
-from rest_framework.views import APIView
-from django.contrib.auth.password_validation import validate_password
-from django.core.exceptions import ValidationError
-from django.views.decorators.csrf import csrf_exempt
 import json
 import logging
 from .serializers import  UserSerializer,InquirySerializer, CarSerializer, MyTokenObtainPairSerializer, RegisterSerializer
-from .models import  Inquiry, Car,User,Profile
+from .models import  Inquiry, Car,User
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import permissions
 
